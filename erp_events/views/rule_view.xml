@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+		<menuitem id="menu_erp_events" parent="base.menu_administration" name="ERP Events" sequence="100"/>
+
+        <record model="ir.ui.view" id="view_erp_event_rule_tree">
+            <field name="name">erp.event.rule.tree</field>
+            <field name="model">erp.event.rule</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="ERP Event Rules" editable="top">
+                    <field name="name"/>
+                    <field name="model_id"/>
+                    <field name="log_create"/>
+                    <field name="log_write"/>
+                    <field name="log_unlink"/>
+                    <field name="active"/>
+                    <field name="state" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+       <record id="view_erp_event_rule_search" model="ir.ui.view">
+            <field name="name">erp.event.rule.search</field>
+            <field name="model">erp.event.rule</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="ERP Event Rules">
+                    <filter name="active" string="Active Rules" domain="[('active','=',True)]"/>
+                    <separator/>
+                    <filter string="Log Creation" domain="[('log_create','=',True)]"/>
+                    <filter string="Log Update" domain="[('log_write','=',True)]"/>
+                    <filter string="Log Deletion" domain="[('log_unlink','=',True)]"/>
+                    <field name="name"/>
+                    <field name="model_id"/>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_erp_event_rule_tree">
+            <field name="name">Event Rules</field>
+            <field name="res_model">erp.event.rule</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="search_view_id" ref="view_erp_event_rule_search"/>
+            <field name="context">{'search_default_active': True, 'active_test': False}</field>
+        </record>
+
+        <menuitem id="menu_action_erp_event_rule_tree" action="action_erp_event_rule_tree" parent="menu_erp_events" />
+
+    </data>
+</openerp>
