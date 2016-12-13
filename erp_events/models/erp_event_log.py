@@ -46,7 +46,7 @@ class ErpEventLog(models.Model):
             if record:
                 self.name = record.display_name
             else:
-                data = eval(self.data or '{}')
+                data = json.loads(self.data or "{}")
                 rec_name = self.env[self.model_id.model]._rec_name
                 if rec_name in data['new']:
                     self.name = data['new'][rec_name]
