@@ -90,8 +90,10 @@ class ErpEventLog(models.Model):
             old_value = self._format_value(field, data['old'].get(fname, ''))
             new_value = self._format_value(field, data['new'].get(fname, ''))
             if old_value != new_value:
-                label = field.get_description(self.env)['string']
-                content.append((label, old_value, new_value))
+                # Replace userfriendly fieldname by technical name
+                # label = field.get_description(self.env)['string']
+                # content.append((label, old_value, new_value))
+                content.append((fname, old_value, new_value))
         return content
 
     @api.one

@@ -20,6 +20,7 @@
 ##############################################################################
 
 from openerp import api, models
+import json
 
 native_read_from_database = models.BaseModel._read_from_database
 native_fields_get = models.BaseModel.fields_get
@@ -40,7 +41,7 @@ def _read_from_database(self, field_names, inherited_field_names=[]):
             vals = {}
             for log in logs:
                 if log.res_id == record.id:
-                    data = eval(log.data or '{}')
+                    data = json.loads(log.data or '{}')
                     vals.update(data.get('old', {}))
             if 'message_ids' in self._fields:
                 vals['message_ids'] = record.message_ids.filtered(lambda msg: msg.date <= history_date)
