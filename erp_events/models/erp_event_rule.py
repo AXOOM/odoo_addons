@@ -47,6 +47,30 @@ class ErpEventRule(models.Model):
     action_id = fields.Many2one('ir.actions.act_window', 'Client Action', readonly=True)
     values_id = fields.Many2one('ir.values', "Add in the 'More' menu", readonly=True)
 
+    is_field_filter_active = fields.Boolean(string="Activate write filter")
+
+    field_filter_ids = fields.Many2many(comodel_name="ir.model.fields", relation="erp_event_rule_model_fields_ref",
+                                        domain="[('model_id', '=', model_id)]",
+                                        column1="event_rule_id", column2="field_id", string="Fields write filter")
+
+    field_filter = fields.Char("Fields write filter", compute="_compute_field_filter", store=True)
+
+    @api.multi
+    @api.depends("field_filter_ids", "model_id", "is_field_filter_active")
+    def _compute_field_filter(self):
+        for rule in self:
+            if not rule.is_field_filter_active:
+                rule.field_filter = "[]"
+                continue
+            fields = []
+            for field in rule.field_filter_ids:
+                fields.append(field.name)
+            rule.field_filter = json.dumps(fields, sort_keys=True)
+
+    def get_field_filter_set(self):
+        self.ensure_one()
+        return set(json.loads(self.field_filter or "[]"))
+
     _sql_constraints = [
         ('model_uniq', 'unique(model_id)', 'There is already a rule defined on this model.\n'
          'You cannot define another: please edit the existing one.'),
@@ -182,7 +206,12 @@ class ErpEventRule(models.Model):
         return data
 
     @api.one
-    def log(self, method, old_values=None, new_values=None):
+    def log(self, method, old_values=None, new_values=None, fields_to_read=None):
+        if self.is_field_filter_active and method in ['write', '_write']:
+            filter_keys = self.get_field_filter_set()
+            intersect_keys = filter_keys.intersection(fields_to_read)
+            if not intersect_keys:
+                return True
         if old_values or new_values:
             data = self._format_data_to_log(old_values, new_values)
             for res_id in data:
@@ -191,7 +220,6 @@ class ErpEventRule(models.Model):
                     'model_id': self.sudo().model_id.id,
                     'method': method,
                     'res_id': res_id,
-                    # 'data': repr(data[res_id]),
                     'data': json.dumps(data[res_id], sort_keys=True)
                 })
         return True

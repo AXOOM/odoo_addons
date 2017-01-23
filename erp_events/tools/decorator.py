@@ -63,6 +63,6 @@ def erp_event_decorator():
             if method == 'create':
                 records = records.browse(result) if isinstance(result, (int, long)) else result
             new_values = records.read(fields_to_read, load='_classic_write')
-            rule.log(method, old_values, new_values)
+            rule.log(method, old_values, new_values, fields_to_read)
         return result
     return erp_event_wrapper
